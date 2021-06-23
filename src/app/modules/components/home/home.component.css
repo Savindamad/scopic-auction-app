@@ -1,0 +1,25 @@
+.item-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.item-des {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.item-price {
+    padding-top: 10px;
+}
+
+.c-pointer {
+    cursor: pointer;
+}
+
+.item-body {
+    min-height: 155px;
+}

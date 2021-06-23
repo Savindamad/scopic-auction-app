@@ -1,0 +1,36 @@
+<div class="px-lg-5">
+    <div class="row">
+        <div class="col-md-10">
+            <div class="form-group">
+                <input type="text" class="form-control" placeholder="Search.." />
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div ngbDropdown class="d-inline-block">
+                <button class="btn btn-outline-primary" id="dropdownBasic1" ngbDropdownToggle> Sort by:
+                    {{selectedSortOption}} </button>
+                <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
+                    <button ngbDropdownItem *ngFor="let option of sortOptions"
+                        (click)="changeSort(option)">{{option}}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col-xl-3 col-lg-4 col-md-6 mb-4" *ngFor="let item of items">
+            <div class="bg-white rounded shadow-sm"><img src="{{item.imageURL}}" alt=""
+                    class="img-fluid card-img-top c-pointer" (click)="onClickBid(item.id)">
+                <div class="p-4 item-body">
+                    <h5 class="text-dark item-name c-pointer" (click)="onClickBid(item.id)">{{item.name}}</h5>
+                    <p class="small text-muted mb-0 item-des">{{item.description}}</p>
+                    <h6 class="item-price">${{item.price}}</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <ngb-pagination [collectionSize]="itemsCount" [(page)]="pageNo" [maxSize]="5" [pageSize]="pageSize"
+        (pageChange)="onPageChange()" aria-label="Default pagination">
+    </ngb-pagination>
+</div>
