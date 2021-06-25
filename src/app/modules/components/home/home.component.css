@@ -16,6 +16,13 @@
     padding-top: 10px;
 }
 
+.item-image {
+    max-height: 250px;
+    height: 100%;
+    width: auto;
+    min-height: 250px;
+}
+
 .c-pointer {
     cursor: pointer;
 }

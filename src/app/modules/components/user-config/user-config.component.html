@@ -1,1 +1,24 @@
-<p>user-config works!</p>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row">
+                <div class="col-md-4">
+                    <form>
+                        <label>
+                            Max Bid value
+                        </label>
+                        <div class="input-group input-group-lg mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">$</span>
+                            </div>
+                            <input [formControl]="bidPrice" type="number" class="form-control">
+                        </div>
+                        <button class="btn btn-primary" (click)="onSaveConfig()"> Save </button>
+                    </form>
+                </div>
+                <div class="col-md-8">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

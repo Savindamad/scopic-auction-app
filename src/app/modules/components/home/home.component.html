@@ -2,7 +2,12 @@
     <div class="row">
         <div class="col-md-10">
             <div class="form-group">
-                <input type="text" class="form-control" placeholder="Search.." />
+                <div class="input-group input-group-lg mb-3">
+                    <input [formControl]="searchText" type="text" class="form-control">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-primary" type="button" (click)="onSearch()">Search</button>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="col-md-2">
@@ -11,7 +16,7 @@
                     {{selectedSortOption}} </button>
                 <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
                     <button ngbDropdownItem *ngFor="let option of sortOptions"
-                        (click)="changeSort(option)">{{option}}</button>
+                        (click)="onChangeSort(option)">{{option}}</button>
                 </div>
             </div>
         </div>
@@ -19,8 +24,11 @@
     <hr>
     <div class="row">
         <div class="col-xl-3 col-lg-4 col-md-6 mb-4" *ngFor="let item of items">
-            <div class="bg-white rounded shadow-sm"><img src="{{item.imageURL}}" alt=""
-                    class="img-fluid card-img-top c-pointer" (click)="onClickBid(item.id)">
+            <div class="bg-white rounded shadow-sm">
+                <div class="text-center">
+                    <img [src]="item.imageUrl" height="250px" alt="" class="img-fluid item-image card-img-top c-pointer"
+                        (click)="onClickBid(item.id)">
+                </div>
                 <div class="p-4 item-body">
                     <h5 class="text-dark item-name c-pointer" (click)="onClickBid(item.id)">{{item.name}}</h5>
                     <p class="small text-muted mb-0 item-des">{{item.description}}</p>

@@ -9,6 +9,8 @@ import { NavBarComponent } from './components/nav-bar/nav-bar.component';
 import { CountdownModule } from 'ngx-countdown';
 import { ModulesComponent } from './modules.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { HttpClientModule } from '@angular/common/http';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 
 @NgModule({
@@ -21,6 +23,9 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     ],
     imports: [
         CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        HttpClientModule,
         RouterModule.forChild(modulesRoutes),
         CountdownModule,
         NgbModule

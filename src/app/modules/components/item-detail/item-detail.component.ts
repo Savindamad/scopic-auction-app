@@ -1,8 +1,13 @@
 import { Component, OnInit } from '@angular/core';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { BidData } from 'src/app/models/bid-data.model';
-import { Item } from 'src/app/models/item.model';
-import { User } from 'src/app/models/user.model';
+import { Item } from 'src/app/models/item/item.model';
+import { UserItem } from 'src/app/models/item/user-item.model';
+import { UserConfig } from 'src/app/models/user/user-config';
+import { User } from 'src/app/models/user/user.model';
+import { ItemService } from 'src/app/services/item.service';
+import { UserService } from 'src/app/services/user.service';
 
 @Component({
   selector: 'app-item-detail',
@@ -11,56 +16,118 @@ import { User } from 'src/app/models/user.model';
 })
 export class ItemDetailComponent implements OnInit {
 
-  constructor(private activatedRoute: ActivatedRoute) { }
   id: number;
   item: Item;
   countdownConfig: Object;
   daysLeft: number;
   maxBid: BidData;
   user: User;
-  bidPrice: number;
+  userItem: UserItem;
+  userConfig: UserConfig;
+  isItemSoldOut: boolean = false;
+
+  bidForm = new FormGroup({
+    price: new FormControl(null, [Validators.required]),
+    autoBid: new FormControl(false,)
+  });
+
+  constructor(
+    private activatedRoute: ActivatedRoute,
+    private itemService: ItemService,
+    private userService: UserService) { }
 
   ngOnInit(): void {
-    this.activatedRoute.queryParams.subscribe(params => {
-      this.id = params['id'];
-      this.item = new Item();
-      this.item.id = this.id;
-      this.item.name = 'Test item name';
-      this.item.description = 'Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod.Donec sed odio dui.';
-      this.item.imageURL = 'https://homepages.cae.wisc.edu/~ece533/images/baboon.png';
-      this.item.closingTime = new Date();
+    this.id = parseInt(this.activatedRoute.snapshot.params['id']);
+    if (this.id) {
+      this.getUser();
 
-      this.user = new User();
-      this.user.id = 1;
+      Promise.all([this.getItem(), this.getUserItem(), this.getUserConfig(), this.getMaxBidItem()]).then((response) => {
+        this.item = response[0];
+        this.userItem = response[1];
+        this.userConfig = response[2];
+        this.maxBid = response[3];
+        if (!this.maxBid) {
+          this.maxBid = new BidData();
+          this.maxBid.price = this.item.price;
+        }
 
-      this.maxBid = new BidData();
-      this.maxBid.userId = 2;
-      this.maxBid.price = 12.00;
-      this.bidPrice = this.maxBid.price + 1;
-      this.setCountdownConfig(17900000);
-    });
+        if (this.userItem) {
+          (this.userItem.isAutoBid) ? this.bidForm.controls['price'].disable({ onlySelf: true }) : this.bidForm.controls['price'].enable({ onlySelf: true });
+          this.bidForm.controls['autoBid'].setValue(this.userItem.isAutoBid);
+        }
+
+        this.setCountdownConfig();
+      });
+    }
   }
 
-  setCountdownConfig(leftTime: number): void {
+  private getUser(): void {
+    this.user = this.userService.getUser().user;
+  }
+
+  private getItem(): Promise<Item> {
+    return this.itemService.getItemsById(this.id);
+  }
+
+  private getUserConfig(): Promise<UserConfig> {
+    return this.userService.getUserConfig(this.user.id);
+  }
+
+  private getMaxBidItem(): Promise<BidData> {
+    return this.itemService.getMaxBidItem(this.id);
+  }
+
+  private getUserItem(): Promise<UserItem> {
+    return this.itemService.getUserItem(this.user.id, this.id);
+  }
+
+  private updateAutoBid(): void {
+    if (!this.userItem) {
+      this.userItem = new UserItem()
+      this.userItem.itemId = this.id;
+      this.userItem.userId = this.user.id;
+    }
+    this.userItem.isAutoBid = this.bidForm.value.autoBid;
+    this.itemService.updateUserItem(this.userItem).then(response => {
+      this.userItem = response;
+      // notify
+    }).catch(error => { });
+  }
+
+  private setCountdownConfig(): void {
+    const leftTime = new Date(this.item.closingTime).getTime() - new Date().getTime();
+    this.isItemSoldOut = (leftTime < 0) ? true : false;
     const miliSeconds = leftTime % 86400000;
     this.daysLeft = Math.floor(leftTime / 86400000);
     let format = (this.daysLeft > 0) ? 'H' : 'H:m:s';
     this.countdownConfig = { leftTime: miliSeconds, format: format };
-
   }
 
   onChangeBid(): void {
-    if (this.validate()) {
-      // submit bid
+    if (this.maxBid && this.maxBid.userId === this.user.id) {
+      // are you sure?
+    }
+    if (this.bidForm.valid && this.validate()) {
+      const bid = new BidData();
+      bid.itemId = this.id;
+      bid.price = this.bidForm.value.price;
+      bid.userId = this.user.id;
+      bid.time = new Date();
+      this.itemService.addNewBid(bid).then(response => {
+        this.getMaxBidItem().then(maxBid => {
+          this.maxBid = maxBid;
+        });
+      });
     }
   }
 
-  validate(): boolean {
-    return (this.bidPrice > this.maxBid.price + 1) ? true : false;
+  private validate(): boolean {
+    return (this.maxBid) ? (this.bidForm.value.price >= this.maxBid.price + 1) : (this.bidForm.value.price > this.item.price + 1);
   }
 
   onChangeAutoBid(): void {
-
+    this.updateAutoBid();
+    (this.userItem.isAutoBid) ? this.bidForm.controls['price'].disable({ onlySelf: true }) : this.bidForm.controls['price'].enable({ onlySelf: true });
   }
 
 }

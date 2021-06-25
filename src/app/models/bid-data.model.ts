@@ -1,4 +1,6 @@
 export class BidData {
-    price: number;
+    itemId: number;
     userId: number;
+    price: number;
+    time: Date;
 }

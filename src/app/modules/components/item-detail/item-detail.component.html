@@ -1,10 +1,10 @@
 <div class="container-fluid">
     <div class="row">
-        <div class="col-md-12">
+        <div *ngIf="item" class="col-md-12">
             <div class="row">
                 <div class="col-md-6">
                     <div class="text-center image-content">
-                        <img alt="Bootstrap Image Preview" [src]="item.imageURL" />
+                        <img class="image-width" alt="Bootstrap Image Preview" [src]="item.imageUrl" />
                     </div>
                 </div>
                 <div class="col-md-6">
@@ -15,35 +15,41 @@
                         </countdown>{{ (daysLeft > 0) ? 'h' : '' }} | {{ item.closingTime | date : 'short' }}
                     </h5>
                     <hr>
-                    <div *ngIf="maxBid.userId != user.id">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="input-group input-group-lg mb-3">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">$</span>
+                    <div *ngIf="!isItemSoldOut">
+                        <form [formGroup]="bidForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="input-group input-group-lg mb-3">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">$</span>
+                                        </div>
+                                        <input formControlName="price" type="number" class="form-control"
+                                            [min]="maxBid.price + 1">
+                                        <div class="input-group-append">
+                                            <button [disabled]="bidForm.value.autoBid" class="btn btn-outline-primary"
+                                                type="button" (click)="onChangeBid()">Place Bid</button>
+                                        </div>
                                     </div>
-                                    <input [(ngModel)]="bidPrice" type="number" class="form-control"
-                                        [min]="maxBid.price" aria-label="Amount (to the nearest dollar)">
-                                    <div class="input-group-append">
-                                        <button class="btn btn-outline-primary" type="button">Place Bid</button>
+                                    <p *ngIf="maxBid.userId == user.id">You have placed the highest bid (${{
+                                        maxBid.price }}) at the moment</p>
+                                    <p *ngIf="maxBid.userId != user.id">
+                                        Enter ${{ maxBid.price + 1 }} or more
+                                    </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input mdbCheckbox class="form-check-input checkbox-lg" type="checkbox"
+                                            id="flexCheckCheckedDisabled" formControlName="autoBid"
+                                            (change)="onChangeAutoBid()" />
+                                        <label class="form-check-label" for="flexCheckCheckedDisabled">
+                                            Auto Bid
+                                        </label>
                                     </div>
                                 </div>
-                                <p>place a bid ${{maxBid.price}}</p>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input checkbox-lg" type="checkbox" id="autoSizingCheck">
-                                    <label class="form-check-label" for="autoSizingCheck">
-                                        Auto Bid
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
+                        </form>
                     </div>
-                    <div *ngIf="maxBid.userId == user.id">
-
-                    </div>
+                    <h5 class="text-danger" *ngIf="isItemSoldOut">Item has been sold out! </h5>
                 </div>
             </div>
         </div>

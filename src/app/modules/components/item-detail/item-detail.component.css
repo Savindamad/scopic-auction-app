@@ -2,3 +2,7 @@
     padding: 15px;
     border: gray solid 1px;
 }
+
+.image-width {
+    max-width: 100%;
+}
